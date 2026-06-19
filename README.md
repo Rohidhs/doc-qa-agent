@@ -1,3 +1,15 @@
+---
+title: Doc QA Agent
+emoji: 🧠
+colorFrom: green
+colorTo: blue
+sdk: streamlit
+sdk_version: 1.39.0
+app_file: app.py
+pinned: false
+python_version: "3.11"
+---
+
 # 🧠 DocMind — Personal Document Q&A Agent
 
 Chat with any PDF, TXT, DOCX, or CSV using a fully local RAG pipeline + a free LLM API. Built end-to-end and deployed live, with conversation memory and source citations.
