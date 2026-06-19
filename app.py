@@ -2,10 +2,15 @@ import streamlit as st
 import os
 import tempfile
 from pathlib import Path
+from dotenv import load_dotenv
 from src.document_processor import DocumentProcessor
 from src.vector_store import VectorStore
 from src.qa_chain import QAChain
 from src.utils import format_source_info, get_file_icon
+
+# Load GROQ_API_KEY from a local .env file if present (no-op on HF Spaces,
+# where the key comes from Settings → Secrets as a real env var instead).
+load_dotenv()
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -129,18 +134,34 @@ with st.sidebar:
     st.markdown("<p style='color:#475569;font-size:0.8rem;margin-top:-8px'>Personal Document Q&A Agent</p>", unsafe_allow_html=True)
     st.divider()
 
-    # API Key input
+    # API Key input — auto-detected from .env (local) or Space Secrets (HF)
     st.markdown("### 🔑 API Configuration")
-    groq_key = st.text_input(
-        "Groq API Key",
-        type="password",
-        placeholder="gsk_...",
-        help="Get a free key at console.groq.com",
-    )
-    if groq_key:
-        os.environ["GROQ_API_KEY"] = groq_key
+    env_key = os.environ.get("GROQ_API_KEY", "")
+
+    if env_key:
         st.session_state.groq_key_set = True
-        st.success("✓ Key saved", icon="✅")
+        st.success("✓ Using configured API key", icon="✅")
+        with st.expander("Use a different key instead"):
+            override_key = st.text_input(
+                "Groq API Key",
+                type="password",
+                placeholder="gsk_...",
+                help="Overrides the configured key for this session only.",
+                label_visibility="collapsed",
+            )
+            if override_key:
+                os.environ["GROQ_API_KEY"] = override_key
+    else:
+        groq_key = st.text_input(
+            "Groq API Key",
+            type="password",
+            placeholder="gsk_...",
+            help="Get a free key at console.groq.com",
+        )
+        if groq_key:
+            os.environ["GROQ_API_KEY"] = groq_key
+            st.session_state.groq_key_set = True
+            st.success("✓ Key saved", icon="✅")
 
     st.divider()
 
